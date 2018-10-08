@@ -53,19 +53,40 @@ TWAS_manhattan = function(dataframe, title=NULL, ylimit=max(abs(dataframe$TWAS.Z
 	d_sig<-d_sig[rev(order(abs(d_sig$TWAS.Z))),]
 	d_sig<-d_sig[!duplicated(d_sig$ID),]
 
-	ggplot(d,aes(x=pos,y=TWAS.Z,colour=factor(CHR))) +
+	if(sum(d_sig$TWAS.Z > 0) > 0){
+		d_sig_pos<-d_sig[d_sig$TWAS.Z > 0,]
+	}
+	
+	if(sum(d_sig$TWAS.Z < 0) > 0){
+		d_sig_neg<-d_sig[d_sig$TWAS.Z < 0,]
+	}
+
+	chr_labs<-as.character(unique(d$CHR))
+	chr_labs[chr_labs == '19'| chr_labs == '21']<-' '
+
+	p<-ggplot(d,aes(x=pos,y=TWAS.Z,colour=factor(CHR))) +
 		geom_point(size=0.5) +
-		scale_x_continuous(name="Chromosome", breaks=ticks, labels=(unique(d$CHR))) +
+		scale_x_continuous(name="Chromosome", breaks=ticks, labels=chr_labs) +
 		scale_y_continuous(name='Z score',limits=c(-ylimit,ylimit)) +
 		scale_colour_manual(values=mycols, guide=FALSE) +
 		geom_hline(yintercept=0,colour="black") +
 		geom_hline(yintercept=Sig_Z_Thresh,colour="blue") +
 		geom_hline(yintercept=-Sig_Z_Thresh,colour="blue") +
-		geom_point(data=d_sig, aes(x=pos,y=TWAS.Z), colour="red", fill='red', size=1.5) +
-		geom_text_repel(data=d_sig, aes(x=pos,y=TWAS.Z, label=ID), colour='black', size=3) +
-		theme(	panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
-				axis.line = element_line(colour = "black"),
-				axis.text.x = element_text(angle=45, size=8))
+		geom_point(data=d_sig, aes(x=pos,y=TWAS.Z), colour="red", fill='red', size=1.5)
+		
+		if(sum(d_sig$TWAS.Z > 0) > 0){
+			p<-p+geom_text_repel(data=d_sig_pos, aes(x=pos,y=TWAS.Z, label=ID), colour='black', nudge_y=1, size=2.5, force=5, segment.alpha=0.25, ylim=c(Sig_Z_Thresh+0.1,NA))
+		}
+		
+		if(sum(d_sig$TWAS.Z < 0) > 0){
+			p<-p+geom_text_repel(data=d_sig_neg, aes(x=pos,y=TWAS.Z, label=ID), colour='black', nudge_y=-1, size=2.5, force=5, segment.alpha=0.25, ylim=c(NA,-Sig_Z_Thresh-0.1))
+		}
+		
+		p<-p+theme(	panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+					axis.line = element_line(colour = "black"),
+					axis.text.x = element_text(angle=45, size=8, hjust=1))
+					
+		p
 }
 
 # Read in the TWAS data
@@ -84,6 +105,6 @@ if(!is.na(opt$sig_p)){
 }
 if(is.na(opt$sig_p) & is.na(opt$sig_z)){
 	png(paste0(opt$output,'.png'), unit='px', res=300, width = 2000, height = 1250)
-	TWAS_manhattan(dataframe=twas)
+	print(TWAS_manhattan(dataframe=twas))
 	dev.off()
 }
