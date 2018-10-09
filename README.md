@@ -1,6 +1,12 @@
 # TWAS-plotter
 
-TWAS-plotter is a tool that creates a Manhattan-style plot for TWAS results using ggplot2. It is designed to work with the output of [**FUSION.assoc_test.R** ](https://github.com/gusevlab/fusion_twas/blob/master/FUSION.assoc_test.R). Feel free to edit the plotting function to meet your needs.
+This repository contains functions for plotting TWAS results:
+
+TWAS-plotter is a tool that creates a Manhattan-style plot for TWAS results using ggplot2. It is designed to work with the output of [**FUSION.assoc_test.R** ](https://github.com/gusevlab/fusion_twas/blob/master/FUSION.assoc_test.R).
+
+TWAS-locus-plotter is a tool that creates locus plots for chosen loci using ggplot2. The figures are very similar to those created using the post-process script but the the labels do not overlap, and genes that are available in the TWAS are highlighted. 
+
+ Feel free to edit the plotting function to meet your needs.
 
 
 
