@@ -82,7 +82,7 @@ done
 
 Creates Manhattan-style plot of TWAS results.
 
-![](![Alt text](FUSION-locus-example.jpg?raw=true "Optional Title"))
+![](TWAS-plotter-example.png?raw=true "Optional Title")
 
 
 ### Parameters
@@ -129,11 +129,11 @@ Creates locus plots for TWAS loci. Similar to plots created by FUSION script but
 
 ###### TWAS-locus-plotter example:
 
-![](C:\Users\mpmop\Desktop\TWAS-locus-example.png)
+![](TWAS-locus-example.png?raw=true "Optional Title")
 
 ###### FUSION equivalent:
 
-![](C:\Users\mpmop\Desktop\PDFtoJPG.me-1 (8).jpg)
+![](FUSION-locus-example.jpg?raw=true "Optional Title")
 
 ### Parameters
 
