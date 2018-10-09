@@ -82,7 +82,7 @@ done
 
 Creates Manhattan-style plot of TWAS results.
 
-![](C:\Users\mpmop\Desktop\TWAS-plotter-example.png)
+![](![Alt text](FUSION-locus-example.jpg?raw=true "Optional Title"))
 
 
 ### Parameters
