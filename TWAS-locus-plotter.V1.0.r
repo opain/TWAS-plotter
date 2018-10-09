@@ -86,8 +86,7 @@ for(i in cond_list){
 	cond_i<-cond_i[complete.cases(cond_i),]
 	
 	# Identify the chromosome number
-	twas_snp<-twas[(twas$BEST.GWAS.ID %in% cond_i$SNP),]
-	chr_i<-twas_snp$CHR[1]
+	chr_i<-twas$CHR[twas$ID == joint$ID[1]]
 	
 	# Extract TWAS results for features in this region
 	twas_i<-twas[twas$CHR == chr_i & twas$P1 > min(cond_i$POS) & twas$P0 < max(cond_i$POS),]
@@ -96,89 +95,74 @@ for(i in cond_list){
 	twas_i_joint<-twas_i[(twas_i$FILE %in% joint$FILE),]
 	twas_i_joint<-twas_i_joint[order(twas_i_joint$P0),]
 	
-	# Split jointly significant genes into chunks
-	for(m in 1:dim(twas_i_joint)[1]){
-		if(m == 1){
-			twas_i_joint$Chunk[m]<-1
-		} else {
-			if(twas_i_joint$P0[m] < twas_i_joint$P0[m-1] + opt$window){
-				twas_i_joint$Chunk[m]<-twas_i_joint$Chunk[m-1]
-			} else {
-				twas_i_joint$Chunk[m]<-twas_i_joint$Chunk[m-1]+1
-			}
-		}
+	#Expand window if there are more than 1 joint genes in locus
+	if(dim(twas_i_joint)[1] > 1){
+		opt$window<-(max(twas_i_joint$P1) - min(twas_i_joint$P0))+opt$window
 	}
 	
-	# Loop through each chunk
-	for(n in unique(twas_i_joint$Chunk)){
-		twas_i_n_joint<-twas_i_joint[twas_i_joint$Chunk == n,]
+	# Extract TWAS features within window of jointly significant genes
+	twas_i_win<-twas_i[twas_i$P0 < (max(twas_i_joint$P1) + opt$window) & twas_i$P1 > (min(twas_i_joint$P0) - opt$window),]
+	twas_i_win<-twas_i_win[order(twas_i_win$P0),]
 	
-		# Extract TWAS features within window of jointly significant genes
-		twas_i_n_win<-twas_i[twas_i$P0 < (max(twas_i_n_joint$P1) + opt$window) & twas_i$P1 > (min(twas_i_n_joint$P0) - opt$window),]
-		twas_i_n_win<-twas_i_n_win[order(twas_i_n_win$P0),]
-		
-		# variable for right boundary to account for labels
-		twas_i_n_win$P1_lab<-twas_i_n_win$P1 + (nchar(twas_i_n_win$ID)*1e5*((opt$window/1)/1e6))
-		Right_boundary<-(max(twas_i_n_win$P1_lab)-opt$window/2)/1e6
-		
-		# Redefine window
-		True_window<-Right_boundary*1e6-min(twas_i_n_joint$P0)
-		
-		# Assign genes 'lines' for gene locations to be plotted.
-		for(j in 1:dim(twas_i_n_win)[1]){
-			if(j == 1){
-				twas_i_n_win$Line<-NA
-				twas_i_n_win$Line[j] <- 1
-			} else {
-				for(k in unique(twas_i_n_win$Line[1:(j-1)])){
-					if(twas_i_n_win$P0[j] < max(twas_i_n_win$P1_lab[which(twas_i_n_win$Line == k)])){
-						if(k != max(unique(twas_i_n_win$Line[1:j-1]))){
-						} else {
-							twas_i_n_win$Line[j]<-max(unique(twas_i_n_win$Line[1:j-1]))+1
-						}
+	# variable for right boundary to account for labels
+	twas_i_win$P1_lab<-twas_i_win$P1 + (nchar(twas_i_win$ID)*1e5*((opt$window/1)/1e6))
+	Right_boundary<-(max(twas_i_win$P1_lab)-opt$window/2)/1e6
+	True_window<-Right_boundary*1e6-min(twas_i_joint$P0)
+
+	# Assign genes 'lines' for gene locations to be plotted.
+	for(j in 1:dim(twas_i_win)[1]){
+		if(j == 1){
+			twas_i_win$Line<-NA
+			twas_i_win$Line[j] <- 1
+		} else {
+			for(k in unique(twas_i_win$Line[1:(j-1)])){
+				if(twas_i_win$P0[j] < max(twas_i_win$P1_lab[which(twas_i_win$Line == k)])){
+					if(k != max(unique(twas_i_win$Line[1:j-1]))){
 					} else {
-						twas_i_n_win$Line[j]<-k
-						break()
+						twas_i_win$Line[j]<-max(unique(twas_i_win$Line[1:j-1]))+1
 					}
+				} else {
+					twas_i_win$Line[j]<-k
+					break()
 				}
 			}
 		}
-		
-		# Label genes as either jointly or marginally significant
-		twas_i_n_win$Label[(twas_i_n_win$ID %in% twas$ID)]<-'NS'
-		twas_i_n_win$Label[(twas_i_n_win$ID %in% ref_not_in_twas$ID)]<-NA
-		twas_i_n_win$Label[(twas_i_n_win$ID %in% dropped$ID)]<-'Marginally'
-		twas_i_n_win$Label[(twas_i_n_win$ID %in% joint$ID)]<-'Jointly'
-		twas_i_n_win$Label<-factor(twas_i_n_win$Label, levels=c('NA','NS','Marginally','Jointly'))
-		
-		# Extract SNPs within opt$window of jointly significant genes and right boundary
-		cond_i_win<-cond_i[which(cond_i$POS < Right_boundary*1e6 & cond_i$POS > (min(twas_i_n_joint$P0) - opt$window)) ,]
-		cond_i_win_for_plot<-rbind(data.frame(cond_i_win[c('SNP','POS')],P=cond_i_win$GWAS.P,Type='Marginal'), data.frame(cond_i_win[c('SNP','POS')], P=cond_i_win$GWAS_cond.P,Type='Conditional'))
-		
-		# Italicise gene IDs
-		twas_i_n_win$ID_ital<-paste0("italic('",twas_i_n_win$ID,"')")
-		
-		# Create plot showing SNP p-values before and after conditioning on the joint model.
-		SNP_plot<-ggplot(cond_i_win_for_plot, aes(x=POS/1e6, y=-log10(P), colour=Type)) +
-			geom_point() +
-			xlim(c(((min(twas_i_n_joint$P0) - opt$window)/1e6),Right_boundary+(opt$window/5e6))) +
-			labs(x=paste0("Position on Chromosome ",chr_i," (Mb)"), y="-log10(P-value)") +
-			theme(legend.title = element_blank()) +
-			scale_color_manual(values=c("#999999", "#3333FF"))
-		
-		# Create plot showing gene locations
-		Gene_plot<-	ggplot() +
-				geom_rect(data=twas_i_n_win, mapping=aes(xmin=P0/1e6, xmax=P1/1e6, ymin=Line+0.1, ymax=Line+1-0.1, colour=Label, fill=Label)) +
-				geom_text(data=twas_i_n_win, aes(x=P1/1e6, y=Line+0.5, label=ID_ital, colour=Label), hjust=-0.1, parse=T) +
-				xlim(c(((min(twas_i_n_joint$P0) - opt$window)/1e6),Right_boundary+(opt$window/5e6))) +
-				labs(x=paste0('Chromosome ',chr_i, " (Mb)")) +
-				theme(axis.line=element_blank(),axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank(),axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), legend.title = element_blank())
-		
-		# Combine the two plots
-		out<-paste0(post_proc_dir,'/',sub('.cond','',i),'_chunk',n,'.OP.png')
-		png(out, units='px', res=300, width=2500,height=750+max(twas_i_n_win$Line)*60)
-		print(plot_grid(Gene_plot,SNP_plot,rel_heights = c(max(twas_i_n_win$Line)/12,1), ncol=1, align='v', axis='l'))
-		dev.off()
 	}
+	
+	# Label genes as either jointly or marginally significant
+	twas_i_win$Label[(twas_i_win$ID %in% twas$ID)]<-'NS'
+	twas_i_win$Label[(twas_i_win$ID %in% ref_not_in_twas$ID)]<-NA
+	twas_i_win$Label[(twas_i_win$ID %in% dropped$ID)]<-'Marginally'
+	twas_i_win$Label[(twas_i_win$ID %in% joint$ID)]<-'Jointly'
+	twas_i_win$Label<-factor(twas_i_win$Label, levels=c('NA','NS','Marginally','Jointly'))
+	
+	# Extract SNPs within opt$window of jointly significant genes and right boundary
+	cond_i_win<-cond_i[which(cond_i$POS < (Right_boundary+((opt$window*1.1)/5e6))*1e6 & cond_i$POS > (min(twas_i_joint$P0) - (opt$window*1.3))) ,]
+	cond_i_win_for_plot<-rbind(data.frame(cond_i_win[c('SNP','POS')],P=cond_i_win$GWAS.P,Type='Marginal'), data.frame(cond_i_win[c('SNP','POS')], P=cond_i_win$GWAS_cond.P,Type='Conditional'))
+	
+	# Italicise gene IDs
+	twas_i_win$ID_ital<-paste0("italic('",twas_i_win$ID,"')")
+	
+	# Create plot showing SNP p-values before and after conditioning on the joint model.
+	SNP_plot<-ggplot(cond_i_win_for_plot, aes(x=POS/1e6, y=-log10(P), colour=Type)) +
+		geom_point() +
+		xlim(c(((min(twas_i_joint$P0) - (opt$window*1.3))/1e6),Right_boundary+((opt$window*1.1)/5e6))) +
+		labs(x=paste0("Position on Chromosome ",chr_i," (Mb)"), y="-log10(P-value)") +
+		theme(legend.title = element_blank()) +
+		scale_color_manual(values=c("#999999", "#3333FF"))
+	
+	# Create plot showing gene locations
+	Gene_plot<-	ggplot() +
+			geom_rect(data=twas_i_win, mapping=aes(xmin=P0/1e6, xmax=P1/1e6, ymin=Line+0.1, ymax=Line+1-0.1, colour=Label, fill=Label)) +
+			geom_text(data=twas_i_win, aes(x=P1/1e6, y=Line+0.5, label=ID_ital, colour=Label), hjust=-0.1, parse=T) +
+			xlim(c(((min(twas_i_joint$P0) - (opt$window*1.3))/1e6),Right_boundary+((opt$window*1.1)/5e6))) +
+			labs(x=paste0('Chromosome ',chr_i, " (Mb)")) +
+			theme(axis.line=element_blank(),axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank(),axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), legend.title = element_blank())
+	
+	# Combine the two plots
+	out<-paste0(post_proc_dir,'/',sub('.cond','',i),'.OP.png')
+	png(out, units='px', res=300, width=2500,height=1000+max(twas_i_win$Line)*50)
+	print(plot_grid(Gene_plot,SNP_plot,rel_heights = c(max(twas_i_win$Line)/10,1), ncol=1, align='v', axis='l'))
+	dev.off()
 }
 
