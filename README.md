@@ -93,6 +93,9 @@ Creates Manhattan-style plot of TWAS results.
 | --sig_z  | Absolute Z score threshold for transcriptome-wide significance |   NA    |
 | --sig_p  | p-value threshold for transcriptome-wide significance        |   NA    |
 | --output | Path to save output                                          |   NA    |
+| --width | Width of plot in pixels                                        |   2000    |
+| --height | Height of plot in pixels                                          |   1250    |
+| --res | Resolution of plot                                         |   300    |
 
 If neither sig_z or sig_p or specified, a Bonferroni correction for the number of features will be used. If there are multiple features with the same ID achieving significance, only the most significant will be labeled. 
 
@@ -119,9 +122,14 @@ Rscript TWAS-plotter.V1.0.r \
 	--twas ukbiobank-2017-1160-prePRS-fusion.tsv.GW \
 	--sig_p 1e-6 \
 	--output Test
+
+# Change size of plot
+Rscript TWAS-plotter.V1.0.r \
+	--twas ukbiobank-2017-1160-prePRS-fusion.tsv.GW \
+	--output Test \
+  --width 3000 \
+  --height 2000
 ```
-
-
 
 ## TWAS-locus-plotter.V1.0.r
 

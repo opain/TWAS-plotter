@@ -11,7 +11,13 @@ make_option("--sig_z", action="store", default=NA, type='numeric',
 make_option("--sig_p", action="store", default=NA, type='numeric',
 		help="p-value threshold for transcriptome-wide significance [optional]"),
 make_option("--output", action="store", default=NA, type='character',
-		help="Path to save output [required]")
+		help="Path to save output [required]"),
+make_option("--width", action="store", default=2000, type='numeric',
+		help="width of plot [optional]"),
+make_option("--height", action="store", default=1250, type='numeric',
+		help="height of plot [optional]"),
+make_option("--res", action="store", default=300, type='numeric',
+		help="height of plot [optional]")
 )
 
 opt = parse_args(OptionParser(option_list=option_list))
@@ -94,17 +100,17 @@ twas<-data.frame(fread(opt$twas))
 
 # Make plot
 if(!is.na(opt$sig_z)){
-	png(paste0(opt$output,'.png'), unit='px', res=300, width = 2000, height = 1250)
+	png(paste0(opt$output,'.png'), unit='px', res=opt$res, width = opt$width, height = opt$height)
 	print(TWAS_manhattan(dataframe=twas, Sig_Z_Thresh=opt$sig_z))
 	dev.off()
 }
 if(!is.na(opt$sig_p)){
-	png(paste0(opt$output,'.png'), unit='px', res=300, width = 2000, height = 1250)
+	png(paste0(opt$output,'.png'), unit='px', res=opt$res, width = opt$width, height = opt$height)
 	print(TWAS_manhattan(dataframe=twas, Sig_Z_Thresh=qnorm(1 - opt$sig_p)))
 	dev.off()
 }
 if(is.na(opt$sig_p) & is.na(opt$sig_z)){
-	png(paste0(opt$output,'.png'), unit='px', res=300, width = 2000, height = 1250)
+	png(paste0(opt$output,'.png'), unit='px', res=opt$res, width = opt$width, height = opt$height)
 	print(TWAS_manhattan(dataframe=twas))
 	dev.off()
 }
