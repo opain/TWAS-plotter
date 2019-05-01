@@ -125,10 +125,10 @@ Rscript TWAS-plotter.V1.0.r \
 
 # Change size of plot
 Rscript TWAS-plotter.V1.0.r \
-	--twas ukbiobank-2017-1160-prePRS-fusion.tsv.GW \
-	--output Test \
-  --width 3000 \
-  --height 2000
+  	--twas ukbiobank-2017-1160-prePRS-fusion.tsv.GW \
+  	--output Test \
+    --width 3000 \
+    --height 2000
 ```
 
 ## TWAS-locus-plotter.V1.0.r
