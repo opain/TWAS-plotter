@@ -70,6 +70,18 @@ TWAS_manhattan = function(dataframe, title=NULL, ylimit=max(abs(dataframe$TWAS.Z
 	chr_labs<-as.character(unique(d$CHR))
 	chr_labs[chr_labs == '19'| chr_labs == '21']<-' '
 
+	if(dim(d_sig)[1] == 0){
+		p<-ggplot(d,aes(x=pos,y=TWAS.Z,colour=factor(CHR))) +
+			geom_point(size=0.5) +
+			scale_x_continuous(name="Chromosome", breaks=ticks, labels=chr_labs) +
+			scale_y_continuous(name='Z score',limits=c(-ylimit,ylimit)) +
+			scale_colour_manual(values=mycols, guide=FALSE) +
+			geom_hline(yintercept=0,colour="black") +
+			geom_hline(yintercept=Sig_Z_Thresh,colour="blue") +
+			geom_hline(yintercept=-Sig_Z_Thresh,colour="blue")
+			
+	} else {
+	
 	p<-ggplot(d,aes(x=pos,y=TWAS.Z,colour=factor(CHR))) +
 		geom_point(size=0.5) +
 		scale_x_continuous(name="Chromosome", breaks=ticks, labels=chr_labs) +
@@ -87,7 +99,8 @@ TWAS_manhattan = function(dataframe, title=NULL, ylimit=max(abs(dataframe$TWAS.Z
 		if(sum(d_sig$TWAS.Z < 0) > 0){
 			p<-p+geom_text_repel(data=d_sig_neg, aes(x=pos,y=TWAS.Z, label=ID), colour='black', nudge_y=-1, size=2.5, force=5, segment.alpha=0.25, ylim=c(NA,-Sig_Z_Thresh-0.1))
 		}
-		
+	}
+	
 		p<-p+theme(	panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
 					axis.line = element_line(colour = "black"),
 					axis.text.x = element_text(angle=45, size=8, hjust=1))
