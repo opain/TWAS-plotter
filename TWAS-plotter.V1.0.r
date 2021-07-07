@@ -101,9 +101,9 @@ TWAS_manhattan = function(dataframe, title=NULL, ylimit=max(abs(dataframe$TWAS.Z
 		}
 	}
 	
-		p<-p+theme(	panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
-					axis.line = element_line(colour = "black"),
-					axis.text.x = element_text(angle=45, size=8, hjust=1))
+		p<-p + 	
+		     theme_cowplot() +
+		     theme(axis.text.x = element_text(angle=45, size=8, hjust=1))
 					
 		p
 }
