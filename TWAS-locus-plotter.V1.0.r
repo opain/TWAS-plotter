@@ -71,7 +71,7 @@ if(n_line > 1){
 # Read in SNP p-values before and after conditioning on joint model
 post_proc_file<-sub(".*/", '', opt$post_proc_prefix)
 post_proc_dir<-sub(paste0('/',post_proc_file), '', opt$post_proc_prefix)
-cond_list<-list.files(path=post_proc_dir, pattern=paste0(post_proc_file,'.*cond$'))
+cond_list<-list.files(path=post_proc_dir, pattern=paste0(post_proc_file,'.loc_.*cond$'))
 cond<-NULL
 for(i in cond_list){
 	temp<-data.frame(fread(paste0(post_proc_dir,'/',i)))
