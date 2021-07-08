@@ -148,8 +148,9 @@ for(i in cond_list){
 		geom_point() +
 		xlim(c(((min(twas_i_joint$P0) - (opt$window*1.3))/1e6),Right_boundary+((opt$window*1.1)/5e6))) +
 		labs(x=paste0("Position on Chromosome ",chr_i," (Mb)"), y="-log10(P-value)") +
+	  theme_cowplot() +
 		theme(legend.title = element_blank()) +
-		scale_color_manual(values=c("#999999", "#3333FF"))
+		scale_color_manual(values=c("#3333FF","#999999"))
 	
 	# Create plot showing gene locations
 	Gene_plot<-	ggplot() +
@@ -157,6 +158,7 @@ for(i in cond_list){
 			geom_text(data=twas_i_win, aes(x=P1/1e6, y=Line+0.5, label=ID_ital, colour=Label), hjust=-0.1, parse=T) +
 			xlim(c(((min(twas_i_joint$P0) - (opt$window*1.3))/1e6),Right_boundary+((opt$window*1.1)/5e6))) +
 			labs(x=paste0('Chromosome ',chr_i, " (Mb)")) +
+	    theme_cowplot() +
 			theme(axis.line=element_blank(),axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank(),axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), legend.title = element_blank())
 	
 	# Combine the two plots
