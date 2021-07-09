@@ -82,6 +82,11 @@ for(i in cond_list){
 	# Read in the first chunk as determined by the post-process files
 	cond_i<-data.frame(fread(paste0(post_proc_dir,'/',i)))
 	
+	# Skip if all NA (can happen in MHC region)
+	if(sum(complete.cases(cond_i) == T) == 0){
+	  next
+	}
+	  
 	# Remove SNPs with missing values
 	cond_i<-cond_i[complete.cases(cond_i),]
 	
