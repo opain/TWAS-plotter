@@ -59,6 +59,11 @@ twas$P0_ref<-NULL
 twas$P1_ref<-NULL
 
 # Read in post process files
+if(!file.exists(paste0(opt$post_proc_prefix,'.joint_included.dat'))){
+  cat(paste0(opt$post_proc_prefix,'.joint_included.dat does not exist\n'))
+  q()
+}
+
 joint<-data.frame(fread(paste0(opt$post_proc_prefix,'.joint_included.dat')),Joint=T)
 n_line<-system(paste0('wc -l ',opt$post_proc_prefix,'.joint_dropped.dat'),intern=T)
 n_line<-as.numeric(unlist(strsplit(n_line,' '))[1])
